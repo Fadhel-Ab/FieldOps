@@ -15,7 +15,31 @@ function getTasks(req, res) {
 
 }
 
+function updateTask(req, res) {
 
+    const { id } = req.params;
+
+    const {
+        status,
+        latitude,
+        longitude
+    } = req.body;
+
+ console.log({
+        id,
+        status,
+        latitude,
+        longitude,
+        image:req.file
+    });
+
+    res.json({
+        message:"Task updated successfully"
+    });
+
+
+}
 module.exports = {
-    getTasks
+    getTasks,
+    updateTask
 };

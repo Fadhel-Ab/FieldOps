@@ -1,18 +1,20 @@
-import express from "express";
-import { getTasks, updateTask } from "../controllers/taskController.js";
-import authenticate from "../middleware/authMiddleware.js";
-import upload from "../middleware/uploadMiddleware.js";
-
+// @ts-check
+const express = require("express");
 const router = express.Router();
-
-
+const upload = require("../middlewares/uploadMiddleware");
+const authenticate = require("../middlewares/authMiddleware");
+const {
+    getTasks,
+    updateTask
+} = require("../controllers/taskController");
 router.get("/", authenticate, getTasks);
 
 
 router.put(
   "/:id",
   authenticate,
+ upload.single("image"),
   updateTask
 );
 
-export default router;
+module.exports = router;
