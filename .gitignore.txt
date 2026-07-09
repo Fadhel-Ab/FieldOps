@@ -1,0 +1,67 @@
+# -----------------------------
+# Node.js
+# -----------------------------
+backend/node_modules/
+backend/npm-debug.log*
+backend/yarn-debug.log*
+backend/yarn-error.log*
+backend/pnpm-debug.log*
+
+# Environment variables
+backend/.env
+backend/.env.*
+
+# Logs
+*.log
+logs/
+
+# -----------------------------
+# Flutter
+# -----------------------------
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.packages
+frontend/build/
+
+# Generated files
+frontend/.metadata
+
+# IDE
+frontend/.idea/
+frontend/.vscode/
+
+# -----------------------------
+# Android
+# -----------------------------
+frontend/android/.gradle/
+frontend/android/local.properties
+
+# -----------------------------
+# iOS
+# -----------------------------
+frontend/ios/Pods/
+frontend/ios/.symlinks/
+frontend/ios/Flutter/Flutter.framework
+frontend/ios/Flutter/Flutter.podspec
+
+# -----------------------------
+# macOS
+# -----------------------------
+frontend/macos/Pods/
+
+# -----------------------------
+# General
+# -----------------------------
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# IntelliJ
+.idea/
+
+# Temporary files
+*.tmp
+*.swp
