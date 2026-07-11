@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../core/api_constants.dart';
+import '../core/constants/api_constants.dart';
 import '../models/login_request.dart';
 import '../models/login_response.dart';
 

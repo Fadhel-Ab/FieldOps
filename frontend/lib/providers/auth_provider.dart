@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../models/login_request.dart';
 import '../repositories/auth_repository.dart';
@@ -10,10 +11,12 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   bool _isAuthenticated = false;
+  String? _token;
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _isAuthenticated;
+  String? get token => _token;
 
   Future<bool> login(LoginRequest request) async {
     _isLoading = true;
@@ -21,15 +24,33 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _authRepository.login(request);
+      final response = await _authRepository.login(request);
+      _token = response.token;
       _isAuthenticated = true;
       return true;
     } catch (e) {
-      _errorMessage="Login failed"; 
+      if (e is DioException) {
+        _errorMessage = e.response?.data["message"] ?? "Login failed";
+      } else {
+        _errorMessage = "Unexpected error occurred";
+      }
+
       return false;
-    }finally{
-      _isLoading=false;
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }
+
+
+  Future<void> checkLoginStatus() async {
+  final savedToken = await _authRepository.getToken();
+
+  if (savedToken != null) {
+    _token = savedToken;
+    _isAuthenticated = true;
+  }
+
+  notifyListeners();
+}
 }
