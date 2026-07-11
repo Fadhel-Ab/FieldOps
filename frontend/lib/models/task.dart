@@ -4,6 +4,8 @@ class Task {
   final String title;
   final String description;
   final String status;
+  final double latitude;
+  final double longitude;
 
   Task({
     required this.id,
@@ -11,6 +13,8 @@ class Task {
     required this.title,
     required this.description,
     required this.status,
+    required this.latitude,
+    required this.longitude,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -20,6 +24,8 @@ class Task {
       title: json['title'],
       description: json['description'],
       status: json['status'],
+      latitude: json['latitude'],
+      longitude: json['longitude'],
     );
   }
 
@@ -30,6 +36,8 @@ class Task {
       "title": title,
       "description": description,
       "status": status,
+      "latitude": latitude,
+      "longitude": longitude,
     };
   }
 }
