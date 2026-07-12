@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/dashboard/dashboard_screen.dart';
+import 'package:provider/provider.dart';
+import '../../models/login_request.dart';
+import '../../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,7 +14,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-
   final _formKey = GlobalKey<FormState>();
 
   final _emailController = TextEditingController();
@@ -25,31 +28,36 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
-    if (_formKey.currentState!.validate()) {
-      final email = _emailController.text.trim();
-      final password = _passwordController.text;
-
-      debugPrint("Email: $email");
-      debugPrint("Password: $password");
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Login Successful"),
-        ),
-      );
-
-      // TODO: Call your API here
+  Future<void> _login() async {
+    final authProvider = context.read<AuthProvider>();
+    if (!_formKey.currentState!.validate()) {
+      return;
     }
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    final request = LoginRequest(email: email, password: password);
+
+    final success = await authProvider.login(request);
+
+    debugPrint("Email: $email");
+    debugPrint("Password: $password");
+
+    if (success) {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (_) => const DashboardScreen(),
+    ),
+  );
+}
   }
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Login"),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text("Login"), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Form(
@@ -57,11 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.lock_outline,
-                size: 80,
-                color: Colors.blue,
-              ),
+              const Icon(Icons.lock_outline, size: 80, color: Colors.blue),
               const SizedBox(height: 30),
 
               TextFormField(
@@ -119,11 +123,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _login,
-                  child: const Text(
-                    "Login",
-                    style: TextStyle(fontSize: 18),
-                  ),
+                  onPressed: authProvider.isLoading ? null : _login,
+                  child: authProvider.isLoading
+                      ? const CircularProgressIndicator()
+                      : const Text("Login", style: TextStyle(fontSize: 18)),
                 ),
               ),
             ],

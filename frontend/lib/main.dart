@@ -38,11 +38,7 @@ class MainApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text("FieldOps")),
         body: Center(
-          child: Consumer<AuthProvider>(
-            builder: (context, auth, child) {
-              return Text(auth.isAuthenticated ? "Logged In" : "Not Logged In");
-            },
-          ),
+          child: LoginScreen(),
         ),
       ),
     );
