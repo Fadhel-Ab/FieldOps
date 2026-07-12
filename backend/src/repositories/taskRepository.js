@@ -35,6 +35,23 @@ function getTasksByUserId(userId) {
   return tasks.filter((task) => task.userId === userId);
 }
 
+function updateTask(id, updates) {
+    const task = tasks.find(task => task.id === id);
+
+    if (!task) {
+        return null;
+    }
+
+    Object.assign(task, updates);
+
+    return task;
+}
+
+module.exports = {
+    getTasksByUserId,
+    updateTask
+};
+
 module.exports = {
   getTasksByUserId,
 };

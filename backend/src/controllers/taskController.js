@@ -14,30 +14,27 @@ function getTasks(req, res) {
     res.json(tasks);
 
 }
-
 function updateTask(req, res) {
 
-    const { id } = req.params;
+    const id = Number(req.params.id);
 
-    const {
-        status,
-        latitude,
-        longitude
-    } = req.body;
-
- console.log({
-        id,
-        status,
-        latitude,
-        longitude,
-        image:req.file
+    const updatedTask = taskRepository.updateTask(id, {
+        status: req.body.status,
+        latitude: req.body.latitude,
+        longitude: req.body.longitude,
+        image: req.file ? req.file.filename : null
     });
+
+    if (!updatedTask) {
+        return res.status(404).json({
+            message: "Task not found"
+        });
+    }
 
     res.json({
-        message:"Task updated successfully"
+        message: "Task updated successfully",
+        task: updatedTask
     });
-
-
 }
 module.exports = {
     getTasks,

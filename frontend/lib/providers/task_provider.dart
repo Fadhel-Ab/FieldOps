@@ -43,6 +43,32 @@ class TaskProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> startTask(int taskId, String token) async {
+    _isLoading = true;
+    _errorMessage = null;
+    _lastToken = token;
+    notifyListeners();
+
+    try {
+      await _taskRepository.startTask(taskId, token);
+      await fetchTasks(token);
+      return true;
+    } catch (e, stackTrace) {
+      if (e is DioException) {
+        _errorMessage = e.response?.data["message"] ?? "Failed to update tasks";
+        return false;
+      } else {
+        debugPrint(e.toString());
+        debugPrint(stackTrace.toString());
+        _errorMessage = "Unexpected error occurred";
+        return false;
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void clearTasks() {
     _lastToken = null;
     _tasks = [];

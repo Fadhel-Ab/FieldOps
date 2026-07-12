@@ -12,4 +12,8 @@ class TaskRepository {
   Future<List<Task>> getTasks(String token) {
     return _taskService.getTasks(token);
   }
+
+  Future<void> startTask(int taskId,String token) {
+    return _taskService.startTask(taskId, token);
+  }
 }
