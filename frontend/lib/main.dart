@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/auth_provider.dart';
+import 'package:frontend/providers/task_provider.dart';
+import 'package:frontend/repositories/task_repository.dart';
+import 'package:frontend/services/task_service.dart';
 import 'services/auth_service.dart';
 import 'models/login_request.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +26,14 @@ void main() {
           create: (context) =>
               AuthProvider(authRepository: context.read<AuthRepository>()),
         ),
+        Provider<TaskService>(create: (_) => TaskService()),
+        Provider<TaskRepository>(
+          create: (context) => TaskRepository(taskService: context.read<TaskService>()),
+        ),
+        ChangeNotifierProvider<TaskProvider>(
+          create: (context) =>
+              TaskProvider(taskRepository: context.read<TaskRepository>()),
+        ),
       ],
       child: const MainApp(),
     ),
@@ -37,9 +48,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text("FieldOps")),
-        body: Center(
-          child: LoginScreen(),
-        ),
+        body: Center(child: LoginScreen()),
       ),
     );
   }
