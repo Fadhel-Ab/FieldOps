@@ -6,9 +6,8 @@ import '../repositories/auth_repository.dart';
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _authRepository;
 
-   AuthProvider({
-    required AuthRepository authRepository,
-  }) : _authRepository = authRepository;
+  AuthProvider({required AuthRepository authRepository})
+    : _authRepository = authRepository;
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -44,15 +43,21 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-
   Future<void> checkLoginStatus() async {
-  final savedToken = await _authRepository.getToken();
+    final savedToken = await _authRepository.getToken();
 
-  if (savedToken != null) {
-    _token = savedToken;
-    _isAuthenticated = true;
+    if (savedToken != null) {
+      _token = savedToken;
+      _isAuthenticated = true;
+    }
+
+    notifyListeners();
   }
 
-  notifyListeners();
-}
+  void signOut() {
+    _token = null;
+    _errorMessage = null;
+    _isLoading = false;
+    notifyListeners();
+  }
 }

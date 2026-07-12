@@ -6,6 +6,7 @@ import '../repositories/task_repository.dart';
 
 class TaskProvider extends ChangeNotifier {
   final TaskRepository _taskRepository;
+  String? _lastToken;
 
   TaskProvider({required TaskRepository taskRepository})
     : _taskRepository = taskRepository;
@@ -19,21 +20,34 @@ class TaskProvider extends ChangeNotifier {
   List<Task> get tasks => _tasks;
 
   Future<void> fetchTasks(String token) async {
+    if (token == _lastToken) return;
+
     _isLoading = true;
     _errorMessage = null;
+    _lastToken = token;
     notifyListeners();
 
     try {
       _tasks = await _taskRepository.getTasks(token);
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (e is DioException) {
-        _errorMessage = e.response?.data["message"] ?? "Login failed";
+        _errorMessage = e.response?.data["message"] ?? "Failed to load tasks";
       } else {
+        debugPrint(e.toString());
+        debugPrint(stackTrace.toString());
         _errorMessage = "Unexpected error occurred";
       }
     } finally {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  void clearTasks() {
+    _lastToken = null;
+    _tasks = [];
+    _errorMessage = null;
+    _isLoading = false;
+    notifyListeners();
   }
 }

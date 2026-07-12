@@ -28,11 +28,19 @@ void main() {
         ),
         Provider<TaskService>(create: (_) => TaskService()),
         Provider<TaskRepository>(
-          create: (context) => TaskRepository(taskService: context.read<TaskService>()),
+          create: (context) =>
+              TaskRepository(taskService: context.read<TaskService>()),
         ),
-        ChangeNotifierProvider<TaskProvider>(
+        
+        ChangeNotifierProxyProvider<AuthProvider, TaskProvider>(
           create: (context) =>
               TaskProvider(taskRepository: context.read<TaskRepository>()),
+          update: (context, auth, taskProvider) {
+            if (auth.token != null) {
+              taskProvider!.fetchTasks(auth.token!);
+            }
+            return taskProvider!;
+          },
         ),
       ],
       child: const MainApp(),
