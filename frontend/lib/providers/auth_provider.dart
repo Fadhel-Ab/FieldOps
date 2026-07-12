@@ -6,7 +6,9 @@ import '../repositories/auth_repository.dart';
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _authRepository;
 
-  AuthProvider({required this._authRepository});
+   AuthProvider({
+    required AuthRepository authRepository,
+  }) : _authRepository = authRepository;
 
   bool _isLoading = false;
   String? _errorMessage;

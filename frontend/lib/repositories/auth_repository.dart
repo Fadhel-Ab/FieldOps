@@ -8,20 +8,22 @@ class AuthRepository {
   final SecureStorageService _secureStorageService;
 
   AuthRepository({
-    required this._authService,
-    required this._secureStorageService,
-  });
+    required AuthService authService,
+    required SecureStorageService secureStorageService,
+  }) : _authService = authService,
+       _secureStorageService = secureStorageService;
 
   Future<LoginResponse> login(LoginRequest request) async {
     final response = await _authService.login(request);
     await _secureStorageService.saveToken(response.token);
     return response;
   }
-  Future<String?> getToken() {
-  return _secureStorageService.getToken();
-}
 
-Future<void> logout() {
-  return _secureStorageService.deleteToken();
-}
+  Future<String?> getToken() {
+    return _secureStorageService.getToken();
+  }
+
+  Future<void> logout() {
+    return _secureStorageService.deleteToken();
+  }
 }
