@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/providers/auth_provider.dart';
+import 'package:frontend/providers/task_provider.dart';
+import 'package:provider/provider.dart';
 import '../../models/task.dart';
 
 class TaskDetailsScreen extends StatelessWidget {
@@ -23,7 +26,23 @@ class TaskDetailsScreen extends StatelessWidget {
 
             Text("Status: ${task.status}"),
             const SizedBox(height: 12),
-            TaskButtons(task: task),
+            TaskButtons(
+              task: task,
+              onStart: () async {
+                final success = await context.read<TaskProvider>().startTask(
+                  task.id,
+                  context.read<AuthProvider>().token!,
+                );
+                if (success && context.mounted) {
+                  Navigator.pop(context);
+                }
+              },
+              onComplete: () async {
+                //gps
+                //img
+                //call provider
+              },
+            ),
           ],
         ),
       ),
@@ -33,25 +52,27 @@ class TaskDetailsScreen extends StatelessWidget {
 
 class TaskButtons extends StatelessWidget {
   final Task task;
-
-  const TaskButtons({super.key, required this.task});
+  final VoidCallback onStart;
+  final VoidCallback onComplete;
+  const TaskButtons({
+    super.key,
+    required this.task,
+    required this.onStart,
+    required this.onComplete,
+  });
 
   @override
   Widget build(BuildContext context) {
     if (task.status == "Pending") {
       return ElevatedButton(
-        onPressed: () {
-          // TODO: Start Task
-        },
+        onPressed: onStart,
         child: const Text("Start Task"),
       );
     }
 
     if (task.status == "In Progress") {
       return ElevatedButton(
-        onPressed: () {
-          // TODO: Complete Task
-        },
+        onPressed: onComplete,
         child: const Text("Complete Task"),
       );
     }

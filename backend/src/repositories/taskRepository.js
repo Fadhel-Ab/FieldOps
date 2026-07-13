@@ -36,22 +36,26 @@ function getTasksByUserId(userId) {
 }
 
 function updateTask(id, updates) {
-    const task = tasks.find(task => task.id === id);
+  const task = tasks.find((task) => task.id === id);
 
-    if (!task) {
-        return null;
-    }
+  if (!task) {
+    return null;
+  }
 
-    Object.assign(task, updates);
+    console.log("Before:", task);
 
-    return task;
+    Object.keys(updates).forEach(key => {
+        if (updates[key] !== undefined) {
+            task[key] = updates[key];
+        }
+    });
+
+    console.log("After:", task);
+
+  return task;
 }
 
 module.exports = {
-    getTasksByUserId,
-    updateTask
-};
-
-module.exports = {
   getTasksByUserId,
+  updateTask,
 };

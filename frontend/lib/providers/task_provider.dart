@@ -20,8 +20,6 @@ class TaskProvider extends ChangeNotifier {
   List<Task> get tasks => _tasks;
 
   Future<void> fetchTasks(String token) async {
-    if (token == _lastToken) return;
-
     _isLoading = true;
     _errorMessage = null;
     _lastToken = token;

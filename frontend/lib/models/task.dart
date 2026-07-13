@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Task {
   final int id;
   final int userId;
@@ -18,14 +20,16 @@ class Task {
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
+    debugPrint(json.toString());
+
     return Task(
       id: json['id'],
       userId: json['userId'],
       title: json['title'],
       description: json['description'],
       status: json['status'],
-      latitude: json['latitude'],
-      longitude: json['longitude'],
+      latitude: (json['latitude'] as num).toDouble(),
+      longitude: (json['longitude'] as num).toDouble(),
     );
   }
 
