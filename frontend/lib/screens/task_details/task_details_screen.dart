@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/auth_provider.dart';
 import 'package:frontend/providers/task_provider.dart';
+import 'package:frontend/services/location_service.dart';
 import 'package:provider/provider.dart';
 import '../../models/task.dart';
 
+
 class TaskDetailsScreen extends StatelessWidget {
   final Task task;
+  final LocationService locationService = LocationService();
 
-  const TaskDetailsScreen({super.key, required this.task});
+  TaskDetailsScreen({super.key, required this.task});
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +41,10 @@ class TaskDetailsScreen extends StatelessWidget {
                 }
               },
               onComplete: () async {
-                //gps
-                //img
-                //call provider
+                final position = await locationService.getCurrentLocation();
+
+                debugPrint("Latitude: ${position.latitude}");
+                debugPrint("Longitude: ${position.longitude}");
               },
             ),
           ],
