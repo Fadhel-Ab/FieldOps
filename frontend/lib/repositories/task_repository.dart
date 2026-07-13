@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../models/task.dart';
 import '../services/task_service.dart';
 
@@ -13,5 +15,15 @@ class TaskRepository {
 
   Future<void> startTask(int taskId, String token) {
     return _taskService.startTask(taskId, token);
+  }
+
+  Future<void> updateTask(
+    int taskId,
+    String token,
+    String status,
+    double latitude,
+    double longitude,
+    File image,) {
+    return _taskService.updateTask(taskId, token, status, latitude, longitude, image);
   }
 }

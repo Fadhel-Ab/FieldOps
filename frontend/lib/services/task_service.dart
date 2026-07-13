@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -24,5 +26,35 @@ class TaskService {
       options: Options(headers: {"Authorization": "Bearer $token"}),
     );
     debugPrint("PUT succeeded");
+  }
+
+  Future<void> updateTask(
+    int taskId,
+    String token,
+    String status,
+    double latitude,
+    double longitude,
+    File image,
+  ) async {
+    final formData = FormData.fromMap({
+      "status": status,
+      "latitude": latitude,
+      "longitude": longitude,
+      "image": await MultipartFile.fromFile(
+        image.path,
+        filename: image.path.split('/').last,
+      ),
+    });
+
+    await _dio.put(
+      "${ApiConstants.tasks}/$taskId",
+      data: formData,
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "multipart/form-data",
+        },
+      ),
+    );
   }
 }

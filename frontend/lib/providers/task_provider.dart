@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -18,8 +20,9 @@ class TaskProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   List<Task> get tasks => _tasks;
+  
 
-  Future<void> fetchTasks(String token) async {
+  Future<void> fetchTasks(String token, {bool? force = false}) async {
     _isLoading = true;
     _errorMessage = null;
     _lastToken = token;
@@ -61,6 +64,37 @@ class TaskProvider extends ChangeNotifier {
         _errorMessage = "Unexpected error occurred";
         return false;
       }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> completeTask(
+    int taskId,
+    String token,
+    double latitude,
+    double longitude,
+    File image,
+  ) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _taskRepository.updateTask(
+        taskId,
+        token,
+        "Completed",
+        latitude,
+        longitude,
+        image,
+      );
+      await fetchTasks(token, force: true);
+      return true;
+    } catch (e) {
+      _errorMessage = "Faild to complete task";
+      return false;
     } finally {
       _isLoading = false;
       notifyListeners();

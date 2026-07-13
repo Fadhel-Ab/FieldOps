@@ -6,8 +6,8 @@ class Task {
   final String title;
   final String description;
   final String status;
-  final double latitude;
-  final double longitude;
+  final double? latitude;
+  final double? longitude;
 
   Task({
     required this.id,
@@ -15,8 +15,8 @@ class Task {
     required this.title,
     required this.description,
     required this.status,
-    required this.latitude,
-    required this.longitude,
+    this.latitude,
+    this.longitude,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -28,8 +28,8 @@ class Task {
       title: json['title'],
       description: json['description'],
       status: json['status'],
-      latitude: (json['latitude'] as num).toDouble(),
-      longitude: (json['longitude'] as num).toDouble(),
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
     );
   }
 

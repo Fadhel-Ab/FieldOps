@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/auth_provider.dart';
 import 'package:frontend/providers/task_provider.dart';
@@ -15,6 +16,10 @@ class TaskDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final taskProvider = context.watch<TaskProvider>();
+    final authProvider = context.read<AuthProvider>();
+
+    final token = authProvider.token;
     return Scaffold(
       appBar: AppBar(title: Text(task.title)),
       body: Padding(
@@ -42,15 +47,33 @@ class TaskDetailsScreen extends StatelessWidget {
                 }
               },
               onComplete: () async {
-                /* final position = await locationService.getCurrentLocation();
+                debugPrint("Before location");
 
-                debugPrint("Latitude: ${position.latitude}");
-                debugPrint("Longitude: ${position.longitude}"); */
+                final position = await locationService.getCurrentLocation();
+
+                debugPrint("After location");
+
                 final image = await cameraService.captureImage();
 
-                if (image != null) {
-                  debugPrint("Image path: ${image.path}");
+                debugPrint("After camera");
+
+                if (image == null) {
+                  return;
                 }
+                final success = await taskProvider.completeTask(
+                  task.id,
+                  token!,
+                  position.latitude,
+                  position.longitude,
+                  image,
+                );
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
+
+                debugPrint(position.latitude.toString());
+                debugPrint(position.longitude.toString());
+                debugPrint(image.path);
               },
             ),
           ],

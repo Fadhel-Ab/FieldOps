@@ -42,15 +42,15 @@ function updateTask(id, updates) {
     return null;
   }
 
-    console.log("Before:", task);
+  console.log("Before:", task);
 
-    Object.keys(updates).forEach(key => {
-        if (updates[key] !== undefined) {
-            task[key] = updates[key];
-        }
-    });
+  Object.keys(updates).forEach((key) => {
+    if (updates[key] !== undefined) {
+      task[key] = updates[key];
+    }
+  });
 
-    console.log("After:", task);
+  console.log("After:", task);
 
   return task;
 }
