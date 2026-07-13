@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:frontend/providers/auth_provider.dart';
 import 'package:frontend/providers/task_provider.dart';
 import 'package:frontend/services/location_service.dart';
+import 'package:frontend/services/camera_service.dart';
 import 'package:provider/provider.dart';
 import '../../models/task.dart';
-
 
 class TaskDetailsScreen extends StatelessWidget {
   final Task task;
   final LocationService locationService = LocationService();
+  final CameraService cameraService = CameraService();
 
   TaskDetailsScreen({super.key, required this.task});
 
@@ -41,10 +42,15 @@ class TaskDetailsScreen extends StatelessWidget {
                 }
               },
               onComplete: () async {
-                final position = await locationService.getCurrentLocation();
+                /* final position = await locationService.getCurrentLocation();
 
                 debugPrint("Latitude: ${position.latitude}");
-                debugPrint("Longitude: ${position.longitude}");
+                debugPrint("Longitude: ${position.longitude}"); */
+                final image = await cameraService.captureImage();
+
+                if (image != null) {
+                  debugPrint("Image path: ${image.path}");
+                }
               },
             ),
           ],
