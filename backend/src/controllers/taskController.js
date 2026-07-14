@@ -7,10 +7,10 @@ function getTasks(req, res) {
 
   res.json(tasks);
 }
-function updateTask(req, res) {
+async function updateTask(req, res) {
   const id = Number(req.params.id);
 
-  const updatedTask = taskRepository.updateTask(id, {
+  const updatedTask = await taskRepository.updateTask(id, {
     status: req.body.status,
     latitude: parseFloat(req.body.latitude),
     longitude: parseFloat(req.body.longitude),
