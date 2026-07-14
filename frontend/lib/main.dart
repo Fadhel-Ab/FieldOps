@@ -3,6 +3,7 @@ import 'package:frontend/providers/auth_provider.dart';
 import 'package:frontend/providers/task_provider.dart';
 import 'package:frontend/repositories/task_repository.dart';
 import 'package:frontend/screens/AuthGate/auth_gate.dart';
+import 'package:frontend/screens/home/home_screen.dart';
 import 'package:frontend/services/camera_service.dart';
 import 'package:frontend/services/location_service.dart';
 import 'package:frontend/services/task_service.dart';
@@ -47,13 +48,9 @@ void main() {
             return taskProvider!;
           },
         ),
-        Provider(
-      create: (_) => LocationService(),
-    ),
+        Provider(create: (_) => LocationService()),
 
-    Provider(
-      create: (_) => CameraService(),
-    ),
+        Provider(create: (_) => CameraService()),
       ],
       child: const MainApp(),
     ),
@@ -66,10 +63,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text("FieldOps")),
-        body: Center(child: AuthGate()),
-      ),
+      home: Scaffold(body: Center(child: AuthGate())),
     );
   }
 }

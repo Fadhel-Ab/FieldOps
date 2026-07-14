@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/dashboard/dashboard_screen.dart';
+import 'package:frontend/screens/home/home_screen.dart';
 import 'package:provider/provider.dart';
 import '../../models/login_request.dart';
 import '../../providers/auth_provider.dart';
@@ -44,13 +45,11 @@ class _LoginScreenState extends State<LoginScreen> {
     debugPrint("Password: $password");
 
     if (success) {
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (_) => const DashboardScreen(),
-    ),
-  );
-}
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    }
   }
 
   @override

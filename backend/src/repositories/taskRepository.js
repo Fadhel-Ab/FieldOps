@@ -20,6 +20,16 @@ const tasks = [
     image: null,
   },
   {
+    id: 1,
+    userId: 1,
+    title: "Install something",
+    description: "Install and test router",
+    status: "In Progress",
+    latitude: 26.2235,
+    longitude: 50.5876,
+    image: null,
+  },
+  {
     id: 3,
     userId: 2,
     title: "Replace hardware",
