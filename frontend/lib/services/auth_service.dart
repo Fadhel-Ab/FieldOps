@@ -5,15 +5,12 @@ import '../models/login_request.dart';
 import '../models/login_response.dart';
 
 class AuthService {
-  final Dio _dio= Dio(
+  final Dio _dio = Dio(
     BaseOptions(
       baseUrl: ApiConstants.baseUrl,
-      headers: {
-         "Content-Type": "application/json",
-      },
-    )
+      headers: {"Content-Type": "application/json"},
+    ),
   );
-
 
   Future<LoginResponse> login(LoginRequest request) async {
     final response = await _dio.post(
@@ -22,5 +19,22 @@ class AuthService {
     );
 
     return LoginResponse.fromJson(response.data);
+  }
+
+  Future<bool> validateToken(String token) async {
+    try {
+    final response = await _dio.get(
+      ApiConstants.tasks,
+      options: Options(
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      ),
+    );
+
+    return response.statusCode == 200;
+  } on DioException {
+    return false;
+  }
   }
 }

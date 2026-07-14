@@ -19,8 +19,16 @@ class AuthRepository {
     return response;
   }
 
-  Future<String?> getToken() {
-    return _secureStorageService.getToken();
+  Future<String?> autoLogin() async {
+    final token = await _secureStorageService.getToken();
+    if (token == null) return null;
+    final isValid = await _authService.validateToken(token);
+    
+    if (!isValid) {
+      await _secureStorageService.deleteToken();
+      return null;
+    }
+    return token;
   }
 
   Future<void> logout() {

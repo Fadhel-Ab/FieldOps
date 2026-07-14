@@ -17,7 +17,16 @@ class LocationService {
         permission == LocationPermission.deniedForever) {
       throw Exception("Location Permision denied");
     }
+    Position? position = await Geolocator.getLastKnownPosition();
 
-    return await Geolocator.getCurrentPosition();
+    if (position != null) {
+      return position;
+    }
+
+    return await Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.medium,
+      ),
+    );
   }
 }

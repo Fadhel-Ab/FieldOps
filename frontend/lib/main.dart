@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/providers/auth_provider.dart';
 import 'package:frontend/providers/task_provider.dart';
 import 'package:frontend/repositories/task_repository.dart';
+import 'package:frontend/screens/AuthGate/auth_gate.dart';
 import 'package:frontend/services/task_service.dart';
 import 'services/auth_service.dart';
 import 'models/login_request.dart';
@@ -23,15 +24,17 @@ void main() {
           ),
         ),
         ChangeNotifierProvider<AuthProvider>(
-          create: (context) =>
-              AuthProvider(authRepository: context.read<AuthRepository>()),
+          create: (context) => AuthProvider(
+            authRepository: context.read<AuthRepository>(),
+            secureStorageService: context.read<SecureStorageService>(),
+          ),
         ),
         Provider<TaskService>(create: (_) => TaskService()),
         Provider<TaskRepository>(
           create: (context) =>
               TaskRepository(taskService: context.read<TaskService>()),
         ),
-        
+
         ChangeNotifierProxyProvider<AuthProvider, TaskProvider>(
           create: (context) =>
               TaskProvider(taskRepository: context.read<TaskRepository>()),
@@ -56,7 +59,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text("FieldOps")),
-        body: Center(child: LoginScreen()),
+        body: Center(child: AuthGate()),
       ),
     );
   }

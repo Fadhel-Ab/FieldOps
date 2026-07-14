@@ -1,13 +1,19 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/storage/secure_storage_service.dart';
 import '../models/login_request.dart';
 import '../repositories/auth_repository.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _authRepository;
+  final SecureStorageService _secureStorageService;
 
-  AuthProvider({required AuthRepository authRepository})
-    : _authRepository = authRepository;
+  AuthProvider({
+    required AuthRepository authRepository,
+    required SecureStorageService secureStorageService,
+  }) : _authRepository = authRepository,
+       _secureStorageService = secureStorageService;
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -28,6 +34,7 @@ class AuthProvider extends ChangeNotifier {
       final response = await _authRepository.login(request);
       _token = response.token;
       _isAuthenticated = true;
+      notifyListeners();
       return true;
     } catch (e) {
       if (e is DioException) {
@@ -43,21 +50,23 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> checkLoginStatus() async {
-    final savedToken = await _authRepository.getToken();
-
-    if (savedToken != null) {
-      _token = savedToken;
-      _isAuthenticated = true;
+  Future<bool> checkLoginStatus() async {
+    final token = await _authRepository.autoLogin();
+    if (token != null) {
+      _token = token;
+      _isAuthenticated=true;
+      notifyListeners();
+      return true;
     }
-
-    notifyListeners();
+    return false;
   }
 
-  void signOut() {
-    _token = null;
-    _errorMessage = null;
-    _isLoading = false;
-    notifyListeners();
-  }
+Future<void> signOut() async {
+  await _authRepository.logout();
+
+  _token = null;
+  _isAuthenticated = false;
+
+  notifyListeners();
+}
 }
