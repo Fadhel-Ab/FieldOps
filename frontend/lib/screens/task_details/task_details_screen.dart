@@ -7,39 +7,52 @@ import 'package:frontend/services/camera_service.dart';
 import 'package:provider/provider.dart';
 import '../../models/task.dart';
 
-class TaskDetailsScreen extends StatelessWidget {
+class TaskDetailsScreen extends StatefulWidget {
   final Task task;
-  final LocationService locationService = LocationService();
-  final CameraService cameraService = CameraService();
 
-  TaskDetailsScreen({super.key, required this.task});
+  const TaskDetailsScreen({super.key, required this.task});
+
+  @override
+  State<TaskDetailsScreen> createState() => _TaskDetailsScreenState();
+}
+
+class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
+  bool isCompleting = false;
 
   @override
   Widget build(BuildContext context) {
     final taskProvider = context.watch<TaskProvider>();
     final authProvider = context.read<AuthProvider>();
+    final locationService = context.read<LocationService>();
+    final cameraService = context.read<CameraService>();
 
     final token = authProvider.token;
     return Scaffold(
-      appBar: AppBar(title: Text(task.title)),
+      appBar: AppBar(
+        title: Text(
+          widget.task.title,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(task.title),
+            Text("Description", style: TextStyle(fontWeight: FontWeight.bold)),
+
+            Text(widget.task.description),
+
             const SizedBox(height: 12),
 
-            Text(task.description),
-            const SizedBox(height: 12),
+            Text("Status", style: TextStyle(fontWeight: FontWeight.bold)),
 
-            Text("Status: ${task.status}"),
-            const SizedBox(height: 12),
+            Text(widget.task.status),
             TaskButtons(
-              task: task,
+              task: widget.task,
               onStart: () async {
                 final success = await context.read<TaskProvider>().startTask(
-                  task.id,
+                  widget.task.id,
                   context.read<AuthProvider>().token!,
                 );
                 if (success && context.mounted) {
@@ -47,33 +60,37 @@ class TaskDetailsScreen extends StatelessWidget {
                 }
               },
               onComplete: () async {
-                debugPrint("Before location");
+                setState(() {
+                  isCompleting = true;
+                });
 
-                final position = await locationService.getCurrentLocation();
+                try {
+                  final position = await locationService.getCurrentLocation();
 
-                debugPrint("After location");
+                  final image = await cameraService.captureImage();
 
-                final image = await cameraService.captureImage();
+                  if (image == null) {
+                    return;
+                  }
 
-                debugPrint("After camera");
+                  final success = await taskProvider.completeTask(
+                    widget.task.id,
+                    token!,
+                    position.latitude,
+                    position.longitude,
+                    image,
+                  );
 
-                if (image == null) {
-                  return;
+                  if (success && context.mounted) {
+                    Navigator.pop(context);
+                  }
+                } finally {
+                  if (mounted) {
+                    setState(() {
+                      isCompleting = false;
+                    });
+                  }
                 }
-                final success = await taskProvider.completeTask(
-                  task.id,
-                  token!,
-                  position.latitude,
-                  position.longitude,
-                  image,
-                );
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-
-                debugPrint(position.latitude.toString());
-                debugPrint(position.longitude.toString());
-                debugPrint(image.path);
               },
             ),
           ],
@@ -110,6 +127,6 @@ class TaskButtons extends StatelessWidget {
       );
     }
 
-    return const Text("Task Completed", style: TextStyle(color: Colors.green));
+    return ElevatedButton(onPressed: null, child: const Text("Task Completed"));
   }
 }

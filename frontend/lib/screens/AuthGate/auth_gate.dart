@@ -25,6 +25,10 @@ class _AuthGateState extends State<AuthGate> {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
 
+    if (authProvider.isCheckingAuth) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     if (authProvider.isAuthenticated) {
       return const DashboardScreen();
     }

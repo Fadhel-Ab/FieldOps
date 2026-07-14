@@ -38,14 +38,14 @@ class DashboardScreen extends StatelessWidget {
         final task = provider.tasks[index];
 
         return Card(
-          margin: const EdgeInsets.all(10),
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
 
           child: ListTile(
             title: Text(task.title),
 
             subtitle: Text(task.description),
 
-            trailing: Text(task.status),
+            trailing: Chip(label: Text(task.status)),
             onTap: () {
               Navigator.push(
                 context,

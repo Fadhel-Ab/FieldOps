@@ -19,6 +19,9 @@ class AuthProvider extends ChangeNotifier {
   String? _errorMessage;
   bool _isAuthenticated = false;
   String? _token;
+  bool _isCheckingAuth = true;
+
+  bool get isCheckingAuth => _isCheckingAuth;
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -51,22 +54,27 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> checkLoginStatus() async {
-    final token = await _authRepository.autoLogin();
-    if (token != null) {
-      _token = token;
-      _isAuthenticated=true;
-      notifyListeners();
-      return true;
-    }
-    return false;
+  final token = await _authRepository.autoLogin();
+
+  if (token != null) {
+    _token = token;
+    _isAuthenticated = true;
+  } else {
+    _isAuthenticated = false;
   }
 
-Future<void> signOut() async {
-  await _authRepository.logout();
-
-  _token = null;
-  _isAuthenticated = false;
-
+  _isCheckingAuth = false;
   notifyListeners();
+
+  return _isAuthenticated;
 }
+
+  Future<void> signOut() async {
+    await _authRepository.logout();
+
+    _token = null;
+    _isAuthenticated = false;
+
+    notifyListeners();
+  }
 }

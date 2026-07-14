@@ -3,6 +3,8 @@ import 'package:frontend/providers/auth_provider.dart';
 import 'package:frontend/providers/task_provider.dart';
 import 'package:frontend/repositories/task_repository.dart';
 import 'package:frontend/screens/AuthGate/auth_gate.dart';
+import 'package:frontend/services/camera_service.dart';
+import 'package:frontend/services/location_service.dart';
 import 'package:frontend/services/task_service.dart';
 import 'services/auth_service.dart';
 import 'models/login_request.dart';
@@ -45,6 +47,13 @@ void main() {
             return taskProvider!;
           },
         ),
+        Provider(
+      create: (_) => LocationService(),
+    ),
+
+    Provider(
+      create: (_) => CameraService(),
+    ),
       ],
       child: const MainApp(),
     ),
