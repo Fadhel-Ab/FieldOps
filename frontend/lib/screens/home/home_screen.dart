@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/providers/auth_provider.dart';
 import 'package:frontend/screens/dashboard/dashboard_screen.dart';
+import 'package:frontend/screens/profile_logout.dart/profile_screen.dart';
 import 'package:frontend/screens/task_details/task_details2.dart';
 import 'package:frontend/widgets/start_task.dart';
 import 'package:provider/provider.dart';
@@ -24,21 +26,19 @@ class _HomeScreenState extends State<HomeScreen> {
     _screens = [
       const HomeDashboardView(),
       const DashboardScreen(),
-      const PlaceholderView(title: "Profile Screen"),
+      const ProfileView(),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     final isLight = theme.brightness == Brightness.light;
 
     return Scaffold(
       backgroundColor: isLight ? Colors.grey[50] : Colors.grey[900],
-      body: IndexedStack(
-        index: _currentIndex, 
-        children: _screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
@@ -86,11 +86,16 @@ class HomeDashboardView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final taskProvider = context.watch<TaskProvider>();
+    final authProvider = context.watch<AuthProvider>();
 
     final assigned = taskProvider.tasks.length;
-    final completed = taskProvider.tasks.where((t) => t.status == "Completed").length;
+    final completed = taskProvider.tasks
+        .where((t) => t.status == "Completed")
+        .length;
 
-    final double completionPercent = assigned > 0 ? (completed / assigned) : 0.0;
+    final double completionPercent = assigned > 0
+        ? (completed / assigned)
+        : 0.0;
 
     final latestInProgress = taskProvider.tasks
         .where((t) => t.status == "In Progress")
@@ -121,7 +126,9 @@ class HomeDashboardView extends StatelessWidget {
           Container(
             margin: const EdgeInsets.only(right: 12),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.4,
+              ),
               shape: BoxShape.circle,
             ),
             child: IconButton(
@@ -150,7 +157,9 @@ class HomeDashboardView extends StatelessWidget {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.5,
+                          ),
                           width: 2,
                         ),
                       ),
@@ -169,13 +178,15 @@ class HomeDashboardView extends StatelessWidget {
                           "Welcome Back,",
                           style: TextStyle(
                             fontSize: 14,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.6,
+                            ),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          "Ahmed",
+                          authProvider.username ?? "User",
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -187,7 +198,9 @@ class HomeDashboardView extends StatelessWidget {
                           "Ready for today's tasks?",
                           style: TextStyle(
                             fontSize: 13,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.7,
+                            ),
                           ),
                         ),
                       ],
@@ -266,7 +279,8 @@ class HomeDashboardView extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => NewTaskDetailsScreen(task: latestInProgress),
+                        builder: (_) =>
+                            NewTaskDetailsScreen(task: latestInProgress),
                       ),
                     );
                   },
@@ -302,10 +316,6 @@ class HomeDashboardView extends StatelessWidget {
     );
   }
 }
-
-// ==========================================
-// 🛠️ PRIVATE MODULAR UI COMPONENTS
-// ==========================================
 
 class _ProgressCard extends StatelessWidget {
   final int completed;
@@ -374,7 +384,9 @@ class _ProgressCard extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: percent,
                     backgroundColor: Colors.white.withValues(alpha: 0.2),
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Colors.white,
+                    ),
                     minHeight: 6,
                   ),
                 ),
@@ -560,10 +572,7 @@ class _EmptyFocusCard extends StatelessWidget {
   final String message;
   final IconData icon;
 
-  const _EmptyFocusCard({
-    required this.message,
-    required this.icon,
-  });
+  const _EmptyFocusCard({required this.message, required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -599,24 +608,6 @@ class _EmptyFocusCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class PlaceholderView extends StatelessWidget {
-  final String title;
-  const PlaceholderView({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Center(
-        child: Text(
-          title,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
       ),
     );
   }

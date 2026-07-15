@@ -65,6 +65,17 @@ const tasks = [
     image: null,
     notes: null,
   },
+  {
+    id: 7,
+    userId: 2,
+    title: "Fix network cable",
+    description: "Replace damaged Cat6 cable in server room",
+    status: "Pending",
+    latitude: 26.2167,
+    longitude: 50.555,
+    image: null,
+    notes: null,
+  },
 ];
 
 function getTasksByUserId(userId) {

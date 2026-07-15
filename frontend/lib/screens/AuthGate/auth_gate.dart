@@ -23,17 +23,29 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
+Widget build(BuildContext context) {
+ final authProvider = context.watch<AuthProvider>();
 
-    if (authProvider.isCheckingAuth) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+debugPrint(
+  "AuthGate instance: ${authProvider.hashCode}",
+);
 
-    if (authProvider.isAuthenticated) {
-      return const HomeScreen();
-    }
+debugPrint(
+  "AuthGate state: ${authProvider.isAuthenticated}",
+);
 
-    return const LoginScreen();
+  if (authProvider.isCheckingAuth) {
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
   }
+
+  if (authProvider.isAuthenticated) {
+    return const HomeScreen();
+  }
+
+  return const LoginScreen();
+}
 }

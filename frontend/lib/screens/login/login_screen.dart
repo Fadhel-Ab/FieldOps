@@ -28,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     final authProvider = context.read<AuthProvider>();
-    
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -39,9 +39,11 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     final request = LoginRequest(email: email, password: password);
+    print(request.email);
+    print(request.password);
 
     final success = await authProvider.login(request);
-
+    print(success);
     if (!mounted) return;
 
     if (success) {
@@ -72,7 +74,10 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Center(
           child: SingleChildScrollView(
             physics: const ClampingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 16.0,
+            ),
             child: Form(
               key: _formKey,
               child: Column(
@@ -88,7 +93,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.construction_rounded, // Swapped to match FieldOps context
+                        Icons
+                            .construction_rounded, // Swapped to match FieldOps context
                         size: 48,
                         color: theme.colorScheme.primary,
                       ),
@@ -130,7 +136,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       if (value == null || value.isEmpty) {
                         return "Please enter your email address";
                       }
-                      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                      final emailRegex = RegExp(
+                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      );
                       if (!emailRegex.hasMatch(value)) {
                         return "Please enter a valid email address";
                       }
@@ -188,7 +196,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        disabledBackgroundColor: theme.colorScheme.primary.withValues(alpha: 0.6),
+                        disabledBackgroundColor: theme.colorScheme.primary
+                            .withValues(alpha: 0.6),
                       ),
                       child: authProvider.isLoading
                           ? SizedBox(
@@ -210,9 +219,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // --- Helper Footnote ---
                   Center(
                     child: TextButton(

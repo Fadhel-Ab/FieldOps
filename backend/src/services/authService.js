@@ -34,6 +34,7 @@ async function login(email, password) {
 
   return {
     token,
+    username: user.username,
   };
 }
 

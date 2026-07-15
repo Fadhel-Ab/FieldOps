@@ -65,6 +65,9 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
           backgroundColor: Colors.green,
         ),
       );
+
+      // Automatically trigger location capture right after a successful photo
+      await _fetchCurrentLocation();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -77,7 +80,7 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
     }
   }
 
-  // Fetch real geolocation coords
+  // Fetch real geolocation coords (triggered automatically by _capturePhoto)
   Future<void> _fetchCurrentLocation() async {
     setState(() {
       _isFetchingLocation = true;
@@ -93,8 +96,6 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
         _coordinates =
             "${result.position.latitude.toStringAsFixed(4)}° N, ${result.position.longitude.toStringAsFixed(4)}° E";
         _locationName = result.address;
-        // Read the plain string address directly from the result root
-        _locationName = result.address;
         _currentPosition = result.position;
         _isFetchingLocation = false;
       });
@@ -103,12 +104,14 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
       setState(() {
         _isFetchingLocation = false;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("❌ Error fetching location: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("❌ Error fetching location: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
-
   // Submit Form Update
 
   Future<void> _submitTaskUpdate() async {
@@ -494,19 +497,6 @@ class LocationSection extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-          ElevatedButton(
-            onPressed: isFetchingLocation ? null : onCaptureLocation,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            ),
-            child: isFetchingLocation
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text("Capture"),
           ),
         ],
       ),

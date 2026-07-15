@@ -23,7 +23,7 @@ class AuthRepository {
     final token = await _secureStorageService.getToken();
     if (token == null) return null;
     final isValid = await _authService.validateToken(token);
-    
+
     if (!isValid) {
       await _secureStorageService.deleteToken();
       return null;
@@ -31,7 +31,9 @@ class AuthRepository {
     return token;
   }
 
-  Future<void> logout() {
-    return _secureStorageService.deleteToken();
+  Future<void> logout(String token) async {
+    await _authService.logout(token);
+
+    await _secureStorageService.deleteToken();
   }
 }

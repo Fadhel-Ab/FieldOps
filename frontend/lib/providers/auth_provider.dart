@@ -20,7 +20,9 @@ class AuthProvider extends ChangeNotifier {
   bool _isAuthenticated = false;
   String? _token;
   bool _isCheckingAuth = true;
+  String? _username;
 
+  String? get username => _username;
   bool get isCheckingAuth => _isCheckingAuth;
 
   bool get isLoading => _isLoading;
@@ -36,6 +38,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       final response = await _authRepository.login(request);
       _token = response.token;
+      _username = response.username;
       _isAuthenticated = true;
       notifyListeners();
       return true;
@@ -54,27 +57,34 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> checkLoginStatus() async {
-  final token = await _authRepository.autoLogin();
+    final token = await _authRepository.autoLogin();
 
-  if (token != null) {
-    _token = token;
-    _isAuthenticated = true;
-  } else {
-    _isAuthenticated = false;
+    if (token != null) {
+      _token = token;
+      _isAuthenticated = true;
+    } else {
+      _isAuthenticated = false;
+    }
+
+    _isCheckingAuth = false;
+    notifyListeners();
+
+    return _isAuthenticated;
   }
 
-  _isCheckingAuth = false;
-  notifyListeners();
+  Future<void> logout() async {
+    try {
+      if (_token != null) {
+        await _authRepository.logout(_token!);
+      }
+    } finally {
+      _token = null;
+      _username = null;
+      _isAuthenticated = false;
 
-  return _isAuthenticated;
-}
+      debugPrint("Logout final: $_isAuthenticated");
 
-  Future<void> signOut() async {
-    await _authRepository.logout();
-
-    _token = null;
-    _isAuthenticated = false;
-
-    notifyListeners();
+      notifyListeners();
+    }
   }
 }
