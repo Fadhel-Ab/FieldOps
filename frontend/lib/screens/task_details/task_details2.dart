@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/task.dart';
+import 'package:frontend/providers/auth_provider.dart';
+import 'package:frontend/providers/task_provider.dart';
+import 'package:frontend/services/camera_service.dart';
+import 'dart:io';
+
+import 'package:frontend/services/location_service.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 
 class NewTaskDetailsScreen extends StatefulWidget {
   final Task task;
@@ -10,17 +18,18 @@ class NewTaskDetailsScreen extends StatefulWidget {
   State<NewTaskDetailsScreen> createState() => _NewTaskDetailsScreenState();
 }
 
-
-
 class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
   final _noteController = TextEditingController();
-  
-  // Simulated operational states
-  String? _photoPath; // Will hold local image path when integrated with image_picker
+
+  // Operational states
+  String? _photoPath; // Holds real local image path
   String _coordinates = "Not captured yet";
   String _locationName = "Unknown Location";
   bool _isFetchingLocation = false;
   bool _isSubmitting = false;
+  Position? _currentPosition;
+  final CameraService cameraService = CameraService();
+  final LocationService locationService = LocationService();
 
   @override
   void dispose() {
@@ -28,31 +37,84 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
     super.dispose();
   }
 
-  // 📸 Simulates taking a photo (Plug 'image_picker' here later!)
-  void _simulateCapturePhoto() {
-    
-    setState(() {
-      
-      _photoPath = "captured_site_photo.jpg"; // Mock path
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("📸 Photo captured successfully!")),
-    );
+  // Capture an actual photo using the camera
+  void _capturePhoto() async {
+    try {
+      final image = await cameraService.captureImage();
+
+      if (image == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("⚠️ Image capture was canceled."),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      setState(() {
+        _photoPath = image.path;
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("📸 Photo attached successfully!"),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("❌ Failed to capture photo: ${e.toString()}"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
-  // 📍 Simulates fetching geolocation coords (Plug 'geolocator' here later!)
-  Future<void> _simulateFetchLocation() async {
-    setState(() => _isFetchingLocation = true);
-    await Future.delayed(const Duration(milliseconds: 800)); // Smooth loading feel
+  // Fetch real geolocation coords
+  Future<void> _fetchCurrentLocation() async {
     setState(() {
-      _coordinates = "26.2285° N, 50.5860° E"; // Mock GPS coordinates (e.g., Manama, Bahrain)
-      _locationName = "Seef District Office, Block 428";
-      _isFetchingLocation = false;
+      _isFetchingLocation = true;
     });
+
+    try {
+      // 1. Capture the new LocationResult model wrapper
+      final LocationResult result = await locationService.getCurrentLocation();
+
+      if (!mounted) return;
+
+      setState(() {
+        _coordinates =
+            "${result.position.latitude.toStringAsFixed(4)}° N, ${result.position.longitude.toStringAsFixed(4)}° E";
+        _locationName = result.address;
+        // Read the plain string address directly from the result root
+        _locationName = result.address;
+        _currentPosition = result.position;
+        _isFetchingLocation = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isFetchingLocation = false;
+      });
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("❌ Error fetching location: $e")));
+    }
   }
 
-  // 🚀 Form submission
-  void _submitTaskUpdate() {
+  // 🚀 Submit Form Update
+  // 1. Mark the method as async
+  Future<void> _submitTaskUpdate() async {
+    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    // Guard check: Validate photo attachment
     if (_photoPath == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -63,19 +125,66 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
       return;
     }
 
-    setState(() => _isSubmitting = true);
-    
-    // Simulate API delay
-    Future.delayed(const Duration(seconds: 1), () {
-      setState(() => _isSubmitting = false);
+    // Guard check: Ensure location data exists (since completeTask requires lat/lng)
+    // Assumes you stored 'result.position' into a state variable named '_currentPosition'
+    if (_currentPosition == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("✅ Task updates successfully uploaded!"),
-          backgroundColor: Colors.green,
+          content: Text(
+            "⚠️ Please fetch your current location before submitting.",
+          ),
+          backgroundColor: Colors.orange,
         ),
       );
-      Navigator.pop(context); // Go back to Home
-    });
+      return;
+    }
+
+    // Set loading state safely before network calls
+    setState(() => _isSubmitting = true);
+
+    try {
+      // 2. Prepare the real file object using the path string
+      // (Ensure you have 'import 'dart:io';' at the top of your file)
+      final File imageFile = File(_photoPath!);
+
+      // 3. Fire the real production network call (replacing the simulated delay)
+      final bool success = await taskProvider.completeTask(
+        widget.task.id,
+        authProvider.token!, // Assumes token is accessible in your scope
+        _currentPosition!.latitude,
+        _currentPosition!.longitude,
+        imageFile,
+      );
+
+      // 4. Memory Guard: Ensure screen hasn't closed during network transit
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("✅ Task updates successfully uploaded!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // 5. Safe pop execution matching modern Flutter framework guidance
+        Navigator.pop(context);
+      } else {
+        throw Exception("Server rejected task completion request.");
+      }
+    } catch (e) {
+      // Graceful error recovery state reset
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("❌ Submission Failed: ${e.toString()}"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -83,7 +192,9 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.brightness == Brightness.light ? Colors.grey[50] : Colors.grey[900],
+      backgroundColor: theme.brightness == Brightness.light
+          ? Colors.grey[50]
+          : Colors.grey[900],
       appBar: AppBar(
         title: const Text("Task Submission"),
         centerTitle: true,
@@ -95,13 +206,13 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// Task Badge & Header
+            /// Task Status Badge
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: widget.task.status == "In Progress" 
-                    ? Colors.orange.withOpacity(0.1) 
-                    : Colors.blueGrey.withOpacity(0.1),
+                color: widget.task.status == "In Progress"
+                    ? Colors.orange.withValues(alpha: 0.1)
+                    : Colors.blueGrey.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -109,7 +220,9 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color: widget.task.status == "In Progress" ? Colors.orange : Colors.blueGrey,
+                  color: widget.task.status == "In Progress"
+                      ? Colors.orange
+                      : Colors.blueGrey,
                   letterSpacing: 0.8,
                 ),
               ),
@@ -122,158 +235,38 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
             const SizedBox(height: 6),
             Text(
               widget.task.description ?? "No description provided.",
-              style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
             ),
-            
+
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
               child: Divider(),
             ),
 
-            /// Section: Photo Attachment
-            _buildSectionTitle(theme, "1. Site Photo Proof"),
+            /// Section 1: Photo Attachment (Now showing the raw, real captured image!)
+            const SectionTitle(text: "1. Site Photo Proof"),
             const SizedBox(height: 10),
-            GestureDetector(
-              onTap: _simulateCapturePhoto,
-              child: Container(
-                height: 160,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: theme.colorScheme.outlineVariant.withOpacity(0.4),
-                    style: _photoPath == null ? BorderStyle.solid : BorderStyle.solid,
-                  ),
-                ),
-                child: _photoPath != null
-                    ? Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Container(
-                              color: Colors.blueGrey[100],
-                              child: const Center(
-                                child: Icon(Icons.image, size: 50, color: Colors.blueGrey),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 12,
-                            right: 12,
-                            child: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(
-                                color: Colors.black54,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.edit, color: Colors.white, size: 16),
-                            ),
-                          ),
-                          const Center(
-                            child: Card(
-                              color: Colors.black87,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                child: Text(
-                                  "Photo Attached (Simulator)",
-                                  style: TextStyle(color: Colors.white, fontSize: 12),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.camera_alt_outlined, size: 38, color: theme.colorScheme.primary),
-                          const SizedBox(height: 8),
-                          Text(
-                            "Tap to Capture Photo",
-                            style: TextStyle(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            "JPEG format, max 10MB",
-                            style: TextStyle(color: Colors.grey, fontSize: 11),
-                          ),
-                        ],
-                      ),
-              ),
+            PhotoSection(photoPath: _photoPath, onCapturePhoto: _capturePhoto),
+
+            const SizedBox(height: 24),
+
+            /// Section 2: Location Validation
+            const SectionTitle(text: "2. Geo-Location Validation"),
+            const SizedBox(height: 10),
+            LocationSection(
+              locationName: _locationName,
+              coordinates: _coordinates,
+              isFetchingLocation: _isFetchingLocation,
+              onCaptureLocation: _fetchCurrentLocation,
             ),
 
             const SizedBox(height: 24),
 
-            /// Section: Location & Coordinates Capture
-            _buildSectionTitle(theme, "2. Geo-Location Validation"),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: theme.colorScheme.outlineVariant.withOpacity(0.4)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.location_on, color: Colors.red, size: 24),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _locationName,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "GPS: $_coordinates",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontFamily: 'monospace',
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: _isFetchingLocation ? null : _simulateFetchLocation,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    ),
-                    child: _isFetchingLocation
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text("Capture"),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            /// Section: Operational Note
-            _buildSectionTitle(theme, "3. Field Operator Notes"),
+            /// Section 3: Operational Notes
+            const SectionTitle(text: "3. Field Operator Notes"),
             const SizedBox(height: 10),
             TextField(
               controller: _noteController,
@@ -285,18 +278,26 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
                 fillColor: theme.colorScheme.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: theme.colorScheme.outlineVariant.withOpacity(0.4)),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: 0.4,
+                    ),
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: theme.colorScheme.outlineVariant.withOpacity(0.4)),
+                  borderSide: BorderSide(
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: 0.4,
+                    ),
+                  ),
                 ),
               ),
             ),
 
             const SizedBox(height: 35),
 
-            /// Submit Action
+            /// Submit Actions
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -313,7 +314,10 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text(
                         "Submit Field Report",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
               ),
             ),
@@ -322,14 +326,192 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
       ),
     );
   }
+}
 
-  Widget _buildSectionTitle(ThemeData theme, String text) {
+/// --- Refined Stateless Widgets ---
+
+class SectionTitle extends StatelessWidget {
+  final String text;
+
+  const SectionTitle({super.key, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Text(
       text,
       style: TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.bold,
         color: theme.colorScheme.onSurface,
+      ),
+    );
+  }
+}
+
+class PhotoSection extends StatelessWidget {
+  final String? photoPath;
+  final VoidCallback onCapturePhoto;
+
+  const PhotoSection({
+    super.key,
+    required this.photoPath,
+    required this.onCapturePhoto,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: onCapturePhoto,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        height: 160,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: photoPath == null
+              ? theme.colorScheme.surfaceVariant.withValues(alpha: 0.3)
+              : theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant.withValues(
+              alpha: photoPath == null ? 0.6 : 0.4,
+            ),
+          ),
+        ),
+        child: photoPath != null
+            ? Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.file(File(photoPath!), fit: BoxFit.cover),
+                  ),
+                  Positioned(
+                    bottom: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.edit,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.camera_alt_outlined,
+                    size: 38,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Tap to Capture Photo",
+                    style: TextStyle(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    "JPEG format, max 10MB",
+                    style: TextStyle(color: Colors.grey, fontSize: 11),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+}
+
+class LocationSection extends StatelessWidget {
+  final String locationName;
+  final String coordinates;
+  final bool isFetchingLocation;
+  final VoidCallback onCaptureLocation;
+
+  const LocationSection({
+    super.key,
+    required this.locationName,
+    required this.coordinates,
+    required this.isFetchingLocation,
+    required this.onCaptureLocation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.red.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.location_on, color: Colors.red, size: 24),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  locationName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "GPS: $coordinates",
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'monospace',
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: isFetchingLocation ? null : onCaptureLocation,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+            child: isFetchingLocation
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text("Capture"),
+          ),
+        ],
       ),
     );
   }

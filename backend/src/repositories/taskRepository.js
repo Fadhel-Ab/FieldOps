@@ -8,6 +8,7 @@ const tasks = [
     latitude: 26.2235,
     longitude: 50.5876,
     image: null,
+    notes: null,
   },
   {
     id: 2,
@@ -46,17 +47,25 @@ function getTasksByUserId(userId) {
 }
 
 function updateTask(id, updates) {
-  const task = tasks.find((task) => task.id === id);
+  const taskIndex = tasks.find((task) => task.id === id);
 
-  if (!task) {
-    return null;
+  if (taskIndex === -1) {
+    throw new Error("Task not found");
   }
 
+const task = tasks[taskIndex];
   console.log("Before:", task);
 
   Object.keys(updates).forEach((key) => {
     if (updates[key] !== undefined) {
-      task[key] = updates[key];
+       // If handling the uploaded image file buffer
+      if (key === 'imageBuffer' && updates.imageBuffer) {
+        task.image = `data:${updates.mimetype};base64,${updates.imageBuffer.toString('base64')}`;
+      } else if (key === 'mimetype') {
+        return; 
+      } else {
+        task[key] = updates[key];
+      }
     }
   });
 

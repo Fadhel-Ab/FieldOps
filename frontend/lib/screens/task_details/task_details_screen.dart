@@ -76,8 +76,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                   final success = await taskProvider.completeTask(
                     widget.task.id,
                     token!,
-                    position.latitude,
-                    position.longitude,
+                    position.position.latitude,
+                    position.position.longitude,
                     image,
                   );
 

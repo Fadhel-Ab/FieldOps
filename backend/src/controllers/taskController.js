@@ -8,28 +8,34 @@ function getTasks(req, res) {
   res.json(tasks);
 }
 async function updateTask(req, res) {
-  const id = Number(req.params.id);
+  try {
+    const id = Number(req.params.id);
+    const { status, latitude, longitude, notes } = req.body;
 
-  const updatedTask = await taskRepository.updateTask(id, {
-    status: req.body.status,
-    latitude: parseFloat(req.body.latitude),
-    longitude: parseFloat(req.body.longitude),
-    image: req.file ? req.file.filename : null,
-  });
+    const updates = {};
 
-  if (!updatedTask) {
+    if (status !== undefined) updates.status = status;
+    if (latitude !== undefined) updates.latitude = parseFloat(latitude);
+    if (longitude !== undefined) updates.longitude = parseFloat(longitude);
+    if (notes !== undefined) updates.notes = notes;
+
+    if (req.file) {
+      updates.imageBuffer = req.file.buffer;
+      updates.mimetype = req.file.mimetype;
+    }
+
+    const updatedTask = await taskRepository.updateTask(id, updates);
+    console.log(req.body);
+    console.log(req.file);
+    res.json({
+      message: "Task updated successfully",
+      task: updatedTask,
+    });
+  } catch (error) {
     return res.status(404).json({
       message: "Task not found",
     });
   }
-
-  res.json({
-    message: "Task updated successfully",
-    task: updatedTask,
-  });
-  console.log(req.body);
-  console.log(req.file);
-  
 }
 module.exports = {
   getTasks,
