@@ -35,6 +35,7 @@ class TaskService {
     double latitude,
     double longitude,
     File image,
+    String note,
   ) async {
     final formData = FormData.fromMap({
       "status": status,
@@ -44,6 +45,7 @@ class TaskService {
         image.path,
         filename: image.path.split('/').last,
       ),
+      "note": note,
     });
 
     await _dio.put(

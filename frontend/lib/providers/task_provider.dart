@@ -76,6 +76,7 @@ class TaskProvider extends ChangeNotifier {
     double latitude,
     double longitude,
     File image,
+    String note,
   ) async {
     _isLoading = true;
     _errorMessage = null;
@@ -89,6 +90,7 @@ class TaskProvider extends ChangeNotifier {
         latitude,
         longitude,
         image,
+        note,
       );
       await fetchTasks(token, force: true);
       return true;

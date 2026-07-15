@@ -109,12 +109,12 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
     }
   }
 
-  // 🚀 Submit Form Update
-  // 1. Mark the method as async
+  // Submit Form Update
+
   Future<void> _submitTaskUpdate() async {
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    // Guard check: Validate photo attachment
+
     if (_photoPath == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -125,8 +125,6 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
       return;
     }
 
-    // Guard check: Ensure location data exists (since completeTask requires lat/lng)
-    // Assumes you stored 'result.position' into a state variable named '_currentPosition'
     if (_currentPosition == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -139,21 +137,20 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
       return;
     }
 
-    // Set loading state safely before network calls
     setState(() => _isSubmitting = true);
 
     try {
-      // 2. Prepare the real file object using the path string
+      // Prepare the real file object using the path string
       // (Ensure you have 'import 'dart:io';' at the top of your file)
       final File imageFile = File(_photoPath!);
 
-      // 3. Fire the real production network call (replacing the simulated delay)
       final bool success = await taskProvider.completeTask(
         widget.task.id,
-        authProvider.token!, // Assumes token is accessible in your scope
+        authProvider.token!,
         _currentPosition!.latitude,
         _currentPosition!.longitude,
         imageFile,
+        _noteController.text,
       );
 
       // 4. Memory Guard: Ensure screen hasn't closed during network transit

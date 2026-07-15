@@ -23,7 +23,17 @@ class TaskRepository {
     String status,
     double latitude,
     double longitude,
-    File image,) {
-    return _taskService.updateTask(taskId, token, status, latitude, longitude, image);
+    File image,
+    String note,
+  ) {
+    return _taskService.updateTask(
+      taskId,
+      token,
+      status,
+      latitude,
+      longitude,
+      image,
+      note,
+    );
   }
 }

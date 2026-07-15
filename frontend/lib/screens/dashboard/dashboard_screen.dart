@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/auth_provider.dart';
+import 'package:frontend/screens/task_details/task_details2.dart';
 import 'package:frontend/screens/task_details/task_details_screen.dart';
 import 'package:frontend/widgets/start_task.dart';
 import 'package:provider/provider.dart';
@@ -256,21 +257,24 @@ class DashboardScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: () {
-      final isPending = task.status == "Pending" || task.status == "To Do";
-      
-      if (isPending) {
-        // Show the elegant confirmation sheet instead of pushing the details page
-        showStartTaskSheet(context, task);
-      } else {
-        // Active or Completed tasks go straight to the action/details page
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => TaskDetailsScreen(task: task),
-          ),
-        );
-      }
-    },
+            final isPending =
+                task.status == "Pending" || task.status == "To Do";
+
+            if (isPending) {
+              // Show the elegant confirmation sheet instead of pushing the details page
+              showStartTaskSheet(context, task);
+            } else if (task.status == "In Progress") {
+              // Active or Completed tasks go straight to the action/details page
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => NewTaskDetailsScreen(task: task),
+                ),
+              );
+            } else {
+              Null;
+            }
+          },
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -372,8 +376,6 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
-
-  
 
   Widget _buildEmptyState(
     BuildContext context, {

@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+/* import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/auth_provider.dart';
 import 'package:frontend/providers/task_provider.dart';
@@ -79,6 +79,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                     position.position.latitude,
                     position.position.longitude,
                     image,
+                    note,
                   );
 
                   if (success && context.mounted) {
@@ -130,3 +131,4 @@ class TaskButtons extends StatelessWidget {
     return ElevatedButton(onPressed: null, child: const Text("Task Completed"));
   }
 }
+ */
