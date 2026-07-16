@@ -4,7 +4,6 @@ import 'package:frontend/providers/auth_provider.dart';
 import 'package:frontend/providers/task_provider.dart';
 import 'package:frontend/services/camera_service.dart';
 import 'dart:io';
-
 import 'package:frontend/services/location_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
@@ -21,8 +20,7 @@ class NewTaskDetailsScreen extends StatefulWidget {
 class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
   final _noteController = TextEditingController();
 
-  // Operational states
-  String? _photoPath; // Holds real local image path
+  String? _photoPath;
   String _coordinates = "Not captured yet";
   String _locationName = "Unknown Location";
   bool _isFetchingLocation = false;
@@ -37,7 +35,6 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
     super.dispose();
   }
 
-  // Capture an actual photo using the camera
   void _capturePhoto() async {
     try {
       final image = await cameraService.captureImage();
@@ -66,7 +63,6 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
         ),
       );
 
-      // Automatically trigger location capture right after a successful photo
       await _fetchCurrentLocation();
     } catch (e) {
       if (mounted) {
@@ -80,14 +76,12 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
     }
   }
 
-  // Fetch real geolocation coords (triggered automatically by _capturePhoto)
   Future<void> _fetchCurrentLocation() async {
     setState(() {
       _isFetchingLocation = true;
     });
 
     try {
-      // 1. Capture the new LocationResult model wrapper
       final LocationResult result = await locationService.getCurrentLocation();
 
       if (!mounted) return;
@@ -112,7 +106,6 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
       );
     }
   }
-  // Submit Form Update
 
   Future<void> _submitTaskUpdate() async {
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
@@ -143,8 +136,6 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      // Prepare the real file object using the path string
-      // (Ensure you have 'import 'dart:io';' at the top of your file)
       final File imageFile = File(_photoPath!);
 
       final bool success = await taskProvider.completeTask(
@@ -156,7 +147,6 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
         _noteController.text,
       );
 
-      // 4. Memory Guard: Ensure screen hasn't closed during network transit
       if (!mounted) return;
       setState(() => _isSubmitting = false);
 
@@ -168,13 +158,11 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
           ),
         );
 
-        // 5. Safe pop execution matching modern Flutter framework guidance
         Navigator.pop(context);
       } else {
         throw Exception("Server rejected task completion request.");
       }
     } catch (e) {
-      // Graceful error recovery state reset
       if (!mounted) return;
       setState(() => _isSubmitting = false);
 
@@ -206,7 +194,7 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// Task Status Badge
+            // Task Status Badge
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
@@ -246,14 +234,14 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
               child: Divider(),
             ),
 
-            /// Section 1: Photo Attachment (Now showing the raw, real captured image!)
+            // Section 1: Photo Attachment
             const SectionTitle(text: "1. Site Photo Proof"),
             const SizedBox(height: 10),
             PhotoSection(photoPath: _photoPath, onCapturePhoto: _capturePhoto),
 
             const SizedBox(height: 24),
 
-            /// Section 2: Location Validation
+            // Section 2: Location Validation
             const SectionTitle(text: "2. Geo-Location Validation"),
             const SizedBox(height: 10),
             LocationSection(
@@ -265,7 +253,7 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
 
             const SizedBox(height: 24),
 
-            /// Section 3: Operational Notes
+            // Section 3: Operational Notes
             const SectionTitle(text: "3. Field Operator Notes"),
             const SizedBox(height: 10),
             TextField(
@@ -297,7 +285,6 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
 
             const SizedBox(height: 35),
 
-            /// Submit Actions
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -327,8 +314,6 @@ class _NewTaskDetailsScreenState extends State<NewTaskDetailsScreen> {
     );
   }
 }
-
-/// --- Refined Stateless Widgets ---
 
 class SectionTitle extends StatelessWidget {
   final String text;

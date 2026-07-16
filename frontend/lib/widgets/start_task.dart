@@ -13,7 +13,6 @@ void showStartTaskSheet(BuildContext context, dynamic task) {
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
     builder: (sheetContext) {
-      // StatefulBuilder lets us manage the loading state of our submit button locally inside the sheet
       bool isSubmitting = false;
 
       return StatefulBuilder(
@@ -24,7 +23,6 @@ void showStartTaskSheet(BuildContext context, dynamic task) {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Small indicator drag bar
                 Center(
                   child: Container(
                     width: 40,
@@ -36,7 +34,7 @@ void showStartTaskSheet(BuildContext context, dynamic task) {
                   ),
                 ),
                 const SizedBox(height: 20),
-                
+
                 Text(
                   "Start This Task?",
                   style: TextStyle(
@@ -55,15 +53,18 @@ void showStartTaskSheet(BuildContext context, dynamic task) {
                 ),
                 const SizedBox(height: 24),
 
-                // Actions Group
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: isSubmitting ? null : () => Navigator.pop(sheetContext),
+                        onPressed: isSubmitting
+                            ? null
+                            : () => Navigator.pop(sheetContext),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         child: const Text("Cancel"),
                       ),
@@ -75,7 +76,9 @@ void showStartTaskSheet(BuildContext context, dynamic task) {
                           backgroundColor: theme.colorScheme.primary,
                           foregroundColor: theme.colorScheme.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           elevation: 0,
                         ),
                         onPressed: isSubmitting
@@ -83,20 +86,21 @@ void showStartTaskSheet(BuildContext context, dynamic task) {
                             : () async {
                                 setSheetState(() => isSubmitting = true);
                                 try {
-                                  // Fetch token and initiate start sequence
-                                  final token = context.read<AuthProvider>().token!;
-                                  final success = await context.read<TaskProvider>().startTask(
-                                    task.id,
-                                    token,
-                                  );
+                                  final token = context
+                                      .read<AuthProvider>()
+                                      .token!;
+                                  final success = await context
+                                      .read<TaskProvider>()
+                                      .startTask(task.id, token);
 
                                   if (success && context.mounted) {
-                                    Navigator.pop(sheetContext); // Close sheet
-                                    
-                                    // Optional: Notify user or automatically route them to the active details page 
+                                    Navigator.pop(sheetContext);
+
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text("Task \"${task.title}\" is now active!"),
+                                        content: Text(
+                                          "Task \"${task.title}\" is now active!",
+                                        ),
                                         behavior: SnackBarBehavior.floating,
                                       ),
                                     );
@@ -105,7 +109,9 @@ void showStartTaskSheet(BuildContext context, dynamic task) {
                                   // Handle error safely if something fails in the process
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text("Failed to start task. Please check connection."),
+                                      content: Text(
+                                        "Failed to start task. Please check connection.",
+                                      ),
                                       backgroundColor: Colors.redAccent,
                                       behavior: SnackBarBehavior.floating,
                                     ),
@@ -122,7 +128,9 @@ void showStartTaskSheet(BuildContext context, dynamic task) {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2.5,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
                             : const Text("Start Task"),

@@ -1,5 +1,5 @@
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart'; // Required import to resolve the error
+import 'package:geocoding/geocoding.dart';
 
 class LocationResult {
   final Position position;
@@ -36,7 +36,6 @@ class LocationService {
 
     String readableAddress = "Address not found";
     try {
-      // This global function now resolves correctly via the package import above
       List<Placemark> placemarks = await geocoding.placemarkFromCoordinates(
         position.latitude,
         position.longitude,
@@ -49,7 +48,7 @@ class LocationService {
                 .replaceAll(
                   RegExp(r'^,\s*|,\s*$'),
                   '',
-                ); // Clean up trailing commas if values are null
+                ); 
       }
     } catch (e) {
       readableAddress = "Coordinates obtained, address unavailable";

@@ -17,7 +17,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  // Cache the screens so they aren't recreated on every rebuild
+  //  preven recreation on every rebuild
   late final List<Widget> _screens;
 
   @override
@@ -147,7 +147,6 @@ class HomeDashboardView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- Header / Greeting Section ---
               Row(
                 children: [
                   GestureDetector(
@@ -211,7 +210,6 @@ class HomeDashboardView extends StatelessWidget {
 
               const SizedBox(height: 28),
 
-              // --- Progress Tracker Card ---
               _ProgressCard(
                 completed: completed,
                 assigned: assigned,
@@ -231,7 +229,6 @@ class HomeDashboardView extends StatelessWidget {
               ),
               const SizedBox(height: 14),
 
-              // --- Dual Overview Cards ---
               Row(
                 children: [
                   Expanded(
@@ -256,7 +253,6 @@ class HomeDashboardView extends StatelessWidget {
 
               const SizedBox(height: 28),
 
-              // --- Quick Focus Section ---
               Text(
                 "Quick Focus",
                 style: TextStyle(
@@ -268,7 +264,7 @@ class HomeDashboardView extends StatelessWidget {
               ),
               const SizedBox(height: 14),
 
-              // 1. Latest In Progress Card
+              // Latest In Progress Card
               if (latestInProgress != null) ...[
                 _FocusTaskCard(
                   title: "Resume Working",
@@ -294,7 +290,7 @@ class HomeDashboardView extends StatelessWidget {
                 const SizedBox(height: 12),
               ],
 
-              // 2. Latest Pending Card
+              // Latest Pending Card
               if (latestPending != null) ...[
                 _FocusTaskCard(
                   title: "Up Next",

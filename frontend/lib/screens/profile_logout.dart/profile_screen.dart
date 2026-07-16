@@ -52,12 +52,10 @@ class _ProfileViewState extends State<ProfileView> {
     setState(() => _isLoggingOut = true);
 
     try {
-      // 🔌 Trigger AuthProvider logout
       await context.read<AuthProvider>().logout();
 
       if (!mounted) return;
 
-      // Navigate to login screen and clear current view stack
       Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
     } catch (e) {
       if (mounted) {
@@ -103,7 +101,7 @@ class _ProfileViewState extends State<ProfileView> {
           child: Column(
             children: [
               const SizedBox(height: 10),
-              // User Avatar
+
               Center(
                 child: Container(
                   padding: const EdgeInsets.all(4),
@@ -126,7 +124,7 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Name & Email Placeholders
+
               Text(
                 authProvider.username ?? "User",
                 style: TextStyle(
@@ -145,7 +143,6 @@ class _ProfileViewState extends State<ProfileView> {
               ),
               const SizedBox(height: 32),
 
-              // Settings list options
               const ProfileSettingsTile(
                 icon: Icons.person_outline_rounded,
                 title: "Personal Information",
@@ -225,8 +222,6 @@ class _ProfileViewState extends State<ProfileView> {
   }
 }
 
-/// A clean, stateless alternative to helper methods.
-/// Using a class allows Flutter to cache and optimize widget rebuilds.
 class ProfileSettingsTile extends StatelessWidget {
   final IconData icon;
   final String title;

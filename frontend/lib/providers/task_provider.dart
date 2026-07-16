@@ -1,8 +1,6 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-
 import '../models/task.dart';
 import '../repositories/task_repository.dart';
 

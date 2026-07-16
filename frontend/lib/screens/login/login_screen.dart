@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // Dismiss active keyboard before initiating call
+    // Dismiss active keyboard
     FocusScope.of(context).unfocus();
 
     final email = _emailController.text.trim();
@@ -52,7 +52,6 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
     } else {
-      // Show error feedback if the request fails
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text("Invalid email or password. Please try again."),
@@ -84,7 +83,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // --- Brand / Identity Header ---
                   Center(
                     child: Container(
                       padding: const EdgeInsets.all(16),
@@ -93,8 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons
-                            .construction_rounded, // Swapped to match FieldOps context
+                        Icons.construction_rounded,
                         size: 48,
                         color: theme.colorScheme.primary,
                       ),
@@ -119,7 +116,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 40),
 
-                  // --- Email Input Field ---
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -147,7 +143,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // --- Password Input Field ---
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
@@ -184,7 +179,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 32),
 
-                  // --- Submit / Progress Button ---
                   SizedBox(
                     height: 52,
                     child: ElevatedButton(
@@ -222,11 +216,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 24),
 
-                  // --- Helper Footnote ---
                   Center(
                     child: TextButton(
                       onPressed: () {
-                        // Handle Forgot Password flow if needed
+                        null;
                       },
                       child: Text(
                         "Forgot Password?",

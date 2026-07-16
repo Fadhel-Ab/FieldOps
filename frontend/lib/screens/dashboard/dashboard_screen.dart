@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/providers/auth_provider.dart';
 import 'package:frontend/screens/task_details/task_details2.dart';
-import 'package:frontend/screens/task_details/task_details_screen.dart';
 import 'package:frontend/widgets/start_task.dart';
 import 'package:provider/provider.dart';
 
@@ -17,7 +16,7 @@ class DashboardScreen extends StatelessWidget {
     final authProvider = context.read<AuthProvider>();
 
     return DefaultTabController(
-      length: 3, // Three main states: To Do/Pending, In Progress, Completed
+      length: 3,
       child: Scaffold(
         backgroundColor: theme.brightness == Brightness.light
             ? Colors.grey[50]
@@ -103,7 +102,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  /// Little numeric bubbles on the tab bar so workers know how many jobs are in each phase
+  // numeric bubbles on the tab bar
   Widget _buildCountBadge(BuildContext context, int count, Color color) {
     if (count == 0) return const SizedBox.shrink();
     return Container(
@@ -261,10 +260,8 @@ class DashboardScreen extends StatelessWidget {
                 task.status == "Pending" || task.status == "To Do";
 
             if (isPending) {
-              // Show the elegant confirmation sheet instead of pushing the details page
               showStartTaskSheet(context, task);
             } else if (task.status == "In Progress") {
-              // Active or Completed tasks go straight to the action/details page
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -352,7 +349,7 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      "Due Today", // Replace dynamically if your task model has a date string (e.g. task.dueDate)
+                      "Due Today",
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,

@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import '../models/login_request.dart';
 import '../services/auth_service.dart';
-import 'dart:io';
 import 'package:dio/dio.dart';
 
 void main() {
@@ -15,7 +14,6 @@ void main() {
 
       print('✅ Token received: ${response.token}');
 
-      // Verification assertions
       expect(response.token, isNotNull);
       expect(response.token, isNotEmpty);
     } on DioException catch (e) {
@@ -23,13 +21,11 @@ void main() {
         '❌ Server rejected the request with status: ${e.response?.statusCode}',
       );
 
-      // THIS LINE IS KEY: It prints the actual error message from your backend
       print('📄 Server Response Body: ${e.response?.data}');
 
       fail('Login failed with 401');
     } catch (e) {
       fail('The login request threw an exception: $e');
-     
     }
   });
 }

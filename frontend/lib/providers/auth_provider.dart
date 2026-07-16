@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/storage/secure_storage_service.dart';
 import '../models/login_request.dart';
 import '../repositories/auth_repository.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _authRepository;
